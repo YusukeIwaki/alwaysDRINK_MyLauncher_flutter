@@ -325,6 +325,7 @@ class ShopListPageState extends State {
                     });
                   });
             }).toSet(),
+            myLocationButtonEnabled: false,
             onMapCreated: (googleMap) {
               _googleMapController.complete(googleMap);
             },
@@ -351,7 +352,6 @@ class ShopListPageState extends State {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          height: 32,
                           child: Text(
                             shop.name,
                             style: Theme.of(context)
