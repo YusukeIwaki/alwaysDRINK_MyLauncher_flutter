@@ -297,7 +297,7 @@ class ShopListPageState extends State {
 
   _setCurrentShopInPageView(Shop target, bool animate) {
     int targetPage = shops.indexWhere((shop) => shop.uuid == target.uuid);
-    if (targetPage >= 0 && _pageController != null) {
+    if (targetPage >= 0 && _pageController.hasClients) {
       if (animate) {
         _pageController.animateToPage(targetPage,
             duration: Duration(milliseconds: 600), curve: Curves.easeOutQuart);
