@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(AlwaysDrinkApp());
 
@@ -109,6 +110,11 @@ class ShopDetail extends StatelessWidget {
   final Shop shop;
   ShopDetail({this.shop});
 
+  _saveAlwaysShopUuid(String uuid) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("shop_uuid", uuid);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MediaQuery.removePadding(
@@ -169,7 +175,7 @@ class ShopDetail extends StatelessWidget {
                   color: alwaysDrinkAccentColor,
                   textColor: alwaysDrinkAccentColor,
                   onPressed: () {
-
+                    _saveAlwaysShopUuid(shop.uuid);
                   },
                 ),
                 Spacer(),
@@ -215,6 +221,11 @@ class ShopListPageState extends State {
     _fetchShopList();
   }
 
+  Future<String> _alwaysShopUuid() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("shop_uuid");
+  }
+
   _fetchShopList() async {
     final response = await http.get(
         "https://api.always.fan/mono/v2/pb/subscription-plan/751acbbe/provider");
@@ -251,10 +262,18 @@ class ShopListPageState extends State {
           }).toList(),
         );
       }).toList();
+      String alwaysShopUuid = await _alwaysShopUuid();
+      Shop newSelectedShop = null;
+      if (alwaysShopUuid != null) {
+        try {
+          newSelectedShop = newShops.firstWhere((shop) => shop.uuid == alwaysShopUuid);
+        } catch (err) { }
+      }
       setState(() {
         serviceAreas =
             newServiceAreas.where((serviceArea) => serviceArea.zoom >= 10);
         shops = newShops;
+        selectedShop = newSelectedShop;
       });
     }
   }
