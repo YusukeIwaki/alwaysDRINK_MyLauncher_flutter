@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 void main() => runApp(AlwaysDrinkApp());
 
@@ -115,6 +117,14 @@ class ShopDetail extends StatelessWidget {
     prefs.setString("shop_uuid", uuid);
   }
 
+  _openBrowser(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MediaQuery.removePadding(
@@ -184,7 +194,7 @@ class ShopDetail extends StatelessWidget {
                   color: alwaysDrinkAccentColor,
                   textColor: Colors.white,
                   onPressed: () {
-
+                    _openBrowser("https://always.fan/original/drink/user-subscription/751acbbe?p=${shop.uuid}");
                   },
                 ),
               ],
