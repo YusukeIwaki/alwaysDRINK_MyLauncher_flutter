@@ -7,93 +7,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'material_color.dart';
+import 'models/picture.dart';
+import 'models/service_area.dart';
+import 'models/shop.dart';
 
 void main() => runApp(AlwaysDrinkApp());
 
-const MaterialColor alwaysDrinkColor = MaterialColor(
-  0xFF62A9DE,
-  <int, Color>{
-    50: Color(0xFFECF5FB),
-    100: Color(0xFFD0E5F5),
-    200: Color(0xFFB1D4EF),
-    300: Color(0xFF91C3E8),
-    400: Color(0xFF7AB6E3),
-    500: Color(0xFF62A9DE),
-    600: Color(0xFF5AA2DA),
-    700: Color(0xFF5098D5),
-    800: Color(0xFF468FD1),
-    900: Color(0xFF347EC8),
-  },
-);
-
-const MaterialAccentColor alwaysDrinkAccentColor = MaterialAccentColor(
-  0xFF2A83DB,
-  <int, Color>{
-    100: Color(0xFF6AA8E6),
-    200: Color(0xFF2A83DB),
-    400: Color(0xFF1F70D2),
-    700: Color(0xFF0F53C4)
-  },
-);
-
-class ServiceArea {
-  String uuid;
-  String name;
-  LatLng location;
-  double zoom;
-
-  ServiceArea({this.uuid, this.name, this.location, this.zoom});
-}
-
-class Shop {
-  String uuid;
-  String name;
-  String description;
-  String roughLocationDescription;
-  String businessHoursDescription;
-  LatLng location;
-  Picture thumbnail;
-  List<Picture> pictures;
-
-  Shop(
-      {this.uuid,
-      this.name,
-      this.description,
-      this.roughLocationDescription,
-      this.businessHoursDescription,
-      this.location,
-      this.thumbnail,
-      this.pictures});
-
-  String markerTitle() {
-    if (roughLocationDescription.isNotEmpty) {
-      return "${roughLocationDescription} - ${name}";
-    } else {
-      return name;
-    }
-  }
-
-  double _dist2From(LatLng target) {
-    return (location.latitude - target.latitude) *
-            (location.latitude - target.latitude) +
-        (location.longitude - target.longitude) *
-            (location.longitude - target.longitude);
-  }
-
-  ServiceArea nearestServiceAreaIn(Iterable<ServiceArea> serviceAreas) {
-    return serviceAreas.reduce((currentArea, nextArea) =>
-        _dist2From(nextArea.location) < _dist2From(currentArea.location)
-            ? nextArea
-            : currentArea);
-  }
-}
-
-class Picture {
-  String smallUrl;
-  String largeUrl;
-
-  Picture({this.smallUrl, this.largeUrl});
-}
 
 class AlwaysDrinkApp extends StatelessWidget {
   // This widget is the root of your application.
