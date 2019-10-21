@@ -45,6 +45,7 @@ class ServiceArea {
 class Shop {
   String uuid;
   String name;
+  String description;
   String roughLocationDescription;
   String businessHoursDescription;
   LatLng location;
@@ -54,6 +55,7 @@ class Shop {
   Shop(
       {this.uuid,
       this.name,
+      this.description,
       this.roughLocationDescription,
       this.businessHoursDescription,
       this.location,
@@ -103,6 +105,94 @@ class AlwaysDrinkApp extends StatelessWidget {
   }
 }
 
+class ShopDetail extends StatelessWidget {
+  final Shop shop;
+  ShopDetail({this.shop});
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: ListView(
+        children: <Widget>[
+          Image.network(shop.thumbnail.largeUrl),
+          SizedBox(
+            height: 220,
+            child: ListView(
+              children: shop.pictures.map<Widget>((picture) {
+                return Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    margin: EdgeInsets.zero,
+                    child: Image.network(picture.largeUrl),
+                  ),
+                );
+              }).toList(),
+              scrollDirection: Axis.horizontal,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 16),
+            child: Text(
+                shop.description,
+                style: Theme.of(context)
+                    .textTheme
+                    .body1
+                    .merge(TextStyle(height: 1.5))),
+          ),
+          Divider(),
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8),
+            child: Text(
+                "営業時間",
+                style: Theme.of(context)
+                    .textTheme
+                    .subhead),
+          ),
+          Padding(
+              padding: EdgeInsets.only(left: 32, right: 16, top: 8, bottom: 16),
+              child: Text(
+                  shop.businessHoursDescription,
+                  style: Theme.of(context)
+                      .textTheme
+                      .body1
+                      .merge(TextStyle(height: 1.5))),
+          ),
+          Padding(
+            padding: EdgeInsets.all(24),
+            child: Row(
+              children: <Widget>[
+                OutlineButton(
+                  child: Text("Set As Always"),
+                  color: alwaysDrinkAccentColor,
+                  textColor: alwaysDrinkAccentColor,
+                  onPressed: () {
+
+                  },
+                ),
+                Spacer(),
+                RaisedButton(
+                  child: Text("パスを表示"),
+                  color: alwaysDrinkAccentColor,
+                  textColor: Colors.white,
+                  onPressed: () {
+
+                  },
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 24,
+          )
+        ],
+      ),
+    );
+  }
+}
+
 class ShopListPageState extends State {
   static CameraPosition _initCameraPosition =
       CameraPosition(target: LatLng(34.6870728, 135.0490244), zoom: 5.0);
@@ -144,6 +234,7 @@ class ShopListPageState extends State {
         return Shop(
           uuid: menu["pbProvider"]["uuid"],
           name: menu["pbProvider"]["name"],
+          description: menu["pbProvider"]["description"],
           roughLocationDescription: menu["pbProvider"]["area"],
           businessHoursDescription: menu["pbProvider"]["businessHours"],
           location: LatLng(menu["pbProvider"]["location"]["lat"],
@@ -211,7 +302,7 @@ class ShopListPageState extends State {
           ),
         ),
         Container(
-          height: 240,
+          height: 280,
           child: PageView(
             controller: pageController,
             children: shops.map<Widget>((shop) {
@@ -225,27 +316,7 @@ class ShopListPageState extends State {
                   ),
                   child: Stack(
                     children: <Widget>[
-                      MediaQuery.removePadding(
-                        context: context,
-                        removeTop: true,
-                        child: ListView(
-                          children:
-                              List<Widget>.generate(20, (internalListIndex) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                Container(
-                                  padding: EdgeInsets.all(16),
-                                  child: Text(
-                                      "internal content ${internalListIndex}"),
-                                  decoration:
-                                      BoxDecoration(color: Colors.yellow),
-                                )
-                              ],
-                            );
-                          }),
-                        ),
-                      ),
+                      ShopDetail(shop: shop),
                       Positioned(
                         left: 0,
                         right: 0,
@@ -279,6 +350,7 @@ class ShopListPageState extends State {
               });
             },
           ),
+          decoration: BoxDecoration(color: Colors.white),
         ),
       ],
     );
