@@ -214,11 +214,7 @@ class ShopListPageState extends State {
       CameraPosition(target: LatLng(34.6870728, 135.0490244), zoom: 5.0);
   Completer<GoogleMapController> _googleMapController = Completer();
 
-  PageController pageController = PageController(
-    initialPage: 0,
-    keepPage: false,
-    viewportFraction: 0.95,
-  );
+  PageController _pageController;
 
   Iterable<ServiceArea> serviceAreas = List();
   List<Shop> shops = List();
@@ -228,6 +224,11 @@ class ShopListPageState extends State {
   void initState() {
     super.initState();
 
+    _pageController = PageController(
+      initialPage: 0,
+      keepPage: false,
+      viewportFraction: 0.95,
+    );
     _fetchShopList();
   }
 
@@ -289,6 +290,24 @@ class ShopListPageState extends State {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _pageController.dispose();
+  }
+
+  _setCurrentShopInPageView(Shop target, bool animate) {
+    int targetPage = shops.indexWhere((shop) => shop.uuid == target.uuid);
+    if (targetPage >= 0 && _pageController != null) {
+      if (animate) {
+        _pageController.animateToPage(targetPage,
+            duration: Duration(milliseconds: 600), curve: Curves.easeOutQuart);
+      } else {
+        _pageController.jumpToPage(targetPage);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     _googleMapController.future.then((googleMap) {
       if (selectedShop != null) {
@@ -298,14 +317,8 @@ class ShopListPageState extends State {
       }
     });
     if (selectedShop != null) {
-      int initialPage =
-          shops.indexWhere((shop) => shop.uuid == selectedShop.uuid);
-      if (initialPage >= 0) {
-        pageController.animateToPage(initialPage,
-            duration: Duration(milliseconds: 600), curve: Curves.easeOutQuart);
-      }
+      _setCurrentShopInPageView(selectedShop, true);
     }
-    ;
     return Column(
       children: <Widget>[
         Expanded(
@@ -320,9 +333,7 @@ class ShopListPageState extends State {
                       : BitmapDescriptor.defaultMarkerWithHue(180),
                   infoWindow: InfoWindow(title: shop.markerTitle()),
                   onTap: () {
-                    setState(() {
-                      selectedShop = shop;
-                    });
+                    _setCurrentShopInPageView(shop, false);
                   });
             }).toSet(),
             myLocationButtonEnabled: false,
@@ -334,7 +345,7 @@ class ShopListPageState extends State {
         Container(
           height: 280,
           child: PageView(
-            controller: pageController,
+            controller: _pageController,
             children: shops.map<Widget>((shop) {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.0),
