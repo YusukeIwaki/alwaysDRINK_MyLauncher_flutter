@@ -145,8 +145,6 @@ class ShopListPageState extends State {
     super.initState();
 
     _pageController = PageController(
-      initialPage: 0,
-      keepPage: false,
       viewportFraction: 0.95,
     );
     _fetchShopList();
@@ -204,8 +202,13 @@ class ShopListPageState extends State {
         serviceAreas =
             newServiceAreas.where((serviceArea) => serviceArea.zoom >= 10);
         shops = newShops;
-        selectedShop = newSelectedShop;
       });
+      if (newSelectedShop != null) {
+        _setCurrentShopInPageView(newSelectedShop);
+        setState(() {
+          selectedShop = newSelectedShop;
+        });
+      }
     }
   }
 
@@ -215,15 +218,10 @@ class ShopListPageState extends State {
     _pageController.dispose();
   }
 
-  _setCurrentShopInPageView(Shop target, bool animate) {
+  _setCurrentShopInPageView(Shop target) {
     int targetPage = shops.indexWhere((shop) => shop.uuid == target.uuid);
     if (targetPage >= 0 && _pageController.hasClients) {
-      if (animate) {
-        _pageController.animateToPage(targetPage,
-            duration: Duration(milliseconds: 600), curve: Curves.easeOutQuart);
-      } else {
-        _pageController.jumpToPage(targetPage);
-      }
+      _pageController.jumpToPage(targetPage);
     }
   }
 
@@ -236,9 +234,6 @@ class ShopListPageState extends State {
             CameraUpdate.newLatLngZoom(selectedShop.location, zoom));
       }
     });
-    if (selectedShop != null) {
-      _setCurrentShopInPageView(selectedShop, true);
-    }
     return Column(
       children: <Widget>[
         Expanded(
@@ -253,7 +248,7 @@ class ShopListPageState extends State {
                       : BitmapDescriptor.defaultMarkerWithHue(180),
                   infoWindow: InfoWindow(title: shop.markerTitle()),
                   onTap: () {
-                    _setCurrentShopInPageView(shop, false);
+                    _setCurrentShopInPageView(shop);
                   });
             }).toSet(),
             myLocationButtonEnabled: false,
