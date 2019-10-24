@@ -45,6 +45,16 @@ class ShopDetail extends StatelessWidget {
     }
   }
 
+  FadeInImage _imageFor(Picture picture) {
+    return FadeInImage(
+      placeholder: NetworkImage(picture.smallUrl),
+      image: NetworkImage(picture.largeUrl),
+      fadeOutDuration: Duration(milliseconds: 30),
+      fadeInDuration: Duration(milliseconds: 600),
+      fit: BoxFit.cover,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MediaQuery.removePadding(
@@ -52,7 +62,10 @@ class ShopDetail extends StatelessWidget {
       removeTop: true,
       child: ListView(
         children: <Widget>[
-          Image.network(shop.thumbnail.largeUrl),
+          SizedBox(
+            height: 320,
+            child: _imageFor(shop.thumbnail),
+          ),
           SizedBox(
             height: 220,
             child: ListView(
@@ -62,7 +75,7 @@ class ShopDetail extends StatelessWidget {
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     margin: EdgeInsets.zero,
-                    child: Image.network(picture.largeUrl),
+                    child: _imageFor(picture),
                   ),
                 );
               }).toList(),
