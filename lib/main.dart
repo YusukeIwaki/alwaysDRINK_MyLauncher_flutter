@@ -62,10 +62,7 @@ class ShopDetail extends StatelessWidget {
       removeTop: true,
       child: ListView(
         children: <Widget>[
-          SizedBox(
-            height: 320,
-            child: _imageFor(shop.thumbnail),
-          ),
+          _imageFor(shop.thumbnail),
           SizedBox(
             height: 220,
             child: ListView(
