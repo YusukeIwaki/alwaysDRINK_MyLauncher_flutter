@@ -30,6 +30,7 @@ dependencies:
   url_launcher: ^5.2.3
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.7.3
   flutter_test:
     sdk: flutter
 
@@ -75,3 +76,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_icons:
+  android: false # ネイティブでプロジェクト分けてあるので、自動生成はしない。
+  ios: true
+  image_path: "launcher_icon/ios_app.png"
