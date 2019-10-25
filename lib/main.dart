@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +14,13 @@ import 'models/picture.dart';
 import 'models/service_area.dart';
 import 'models/shop.dart';
 
-void main() => runApp(AlwaysDrinkApp());
+void main() {
+  if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
+  return runApp(AlwaysDrinkApp());
+}
 
 
 class AlwaysDrinkApp extends StatelessWidget {
