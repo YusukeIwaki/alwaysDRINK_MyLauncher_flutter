@@ -14,7 +14,6 @@ import 'models/shop.dart';
 
 void main() => runApp(AlwaysDrinkApp());
 
-
 class AlwaysDrinkApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -22,7 +21,9 @@ class AlwaysDrinkApp extends StatelessWidget {
     return MaterialApp(
       title: 'always DRINK',
       theme: ThemeData(
-          primarySwatch: alwaysDrinkColor, accentColor: alwaysDrinkAccentColor),
+        primarySwatch: alwaysDrinkColor,
+        accentColor: alwaysDrinkAccentColor,
+      ),
       home: ShopListPage(),
     );
   }
@@ -30,6 +31,7 @@ class AlwaysDrinkApp extends StatelessWidget {
 
 class ShopDetail extends StatelessWidget {
   final Shop shop;
+
   ShopDetail({this.shop});
 
   _saveAlwaysShopUuid(String uuid) async {
@@ -40,8 +42,6 @@ class ShopDetail extends StatelessWidget {
   _openBrowser(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
-    } else {
-
     }
   }
 
@@ -81,8 +81,7 @@ class ShopDetail extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 16),
-            child: Text(
-                shop.description,
+            child: Text(shop.description,
                 style: Theme.of(context)
                     .textTheme
                     .body1
@@ -91,20 +90,15 @@ class ShopDetail extends StatelessWidget {
           Divider(),
           Padding(
             padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8),
-            child: Text(
-                "営業時間",
-                style: Theme.of(context)
-                    .textTheme
-                    .subhead),
+            child: Text("営業時間", style: Theme.of(context).textTheme.subhead),
           ),
           Padding(
-              padding: EdgeInsets.only(left: 32, right: 16, top: 8, bottom: 16),
-              child: Text(
-                  shop.businessHoursDescription,
-                  style: Theme.of(context)
-                      .textTheme
-                      .body1
-                      .merge(TextStyle(height: 1.5))),
+            padding: EdgeInsets.only(left: 32, right: 16, top: 8, bottom: 16),
+            child: Text(shop.businessHoursDescription,
+                style: Theme.of(context)
+                    .textTheme
+                    .body1
+                    .merge(TextStyle(height: 1.5))),
           ),
           Padding(
             padding: EdgeInsets.all(24),
@@ -124,7 +118,8 @@ class ShopDetail extends StatelessWidget {
                   color: alwaysDrinkAccentColor,
                   textColor: Colors.white,
                   onPressed: () {
-                    _openBrowser("https://always.fan/original/drink/user-subscription/751acbbe?p=${shop.uuid}");
+                    _openBrowser(
+                        "https://always.fan/original/drink/user-subscription/751acbbe?p=${shop.uuid}");
                   },
                 ),
               ],
@@ -205,8 +200,9 @@ class ShopListPageState extends State {
       Shop newSelectedShop = null;
       if (alwaysShopUuid != null) {
         try {
-          newSelectedShop = newShops.firstWhere((shop) => shop.uuid == alwaysShopUuid);
-        } catch (err) { }
+          newSelectedShop =
+              newShops.firstWhere((shop) => shop.uuid == alwaysShopUuid);
+        } catch (err) {}
       }
       setState(() {
         serviceAreas =

@@ -6,5 +6,10 @@ class ServiceArea {
   LatLng location;
   double zoom;
 
-  ServiceArea({this.uuid, this.name, this.location, this.zoom});
+  ServiceArea({
+    this.uuid,
+    this.name,
+    this.location,
+    this.zoom,
+  });
 }

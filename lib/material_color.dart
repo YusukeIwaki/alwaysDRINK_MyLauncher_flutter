@@ -22,6 +22,6 @@ const MaterialAccentColor alwaysDrinkAccentColor = MaterialAccentColor(
     100: Color(0xFF6AA8E6),
     200: Color(0xFF2A83DB),
     400: Color(0xFF1F70D2),
-    700: Color(0xFF0F53C4)
+    700: Color(0xFF0F53C4),
   },
 );
