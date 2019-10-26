@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'material_color.dart';
@@ -39,11 +38,6 @@ class AlwaysDrinkApp extends StatelessWidget {
 class ShopDetail extends StatelessWidget {
   final Shop shop;
   ShopDetail({this.shop});
-
-  _saveAlwaysShopUuid(String uuid) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("shop_uuid", uuid);
-  }
 
   _openBrowser(String url) async {
     if (await canLaunch(url)) {
@@ -123,7 +117,7 @@ class ShopDetail extends StatelessWidget {
                   color: alwaysDrinkAccentColor,
                   textColor: alwaysDrinkAccentColor,
                   onPressed: () {
-                    _saveAlwaysShopUuid(shop.uuid);
+
                   },
                 ),
                 Spacer(),
@@ -168,11 +162,6 @@ class ShopListPageState extends State {
     _fetchShopList();
   }
 
-  Future<String> _alwaysShopUuid() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("shop_uuid");
-  }
-
   _fetchShopList() async {
     final response = await http.get(
         "https://api.always.fan/mono/v2/pb/subscription-plan/751acbbe/provider");
@@ -209,24 +198,11 @@ class ShopListPageState extends State {
           }).toList(),
         );
       }).toList();
-      String alwaysShopUuid = await _alwaysShopUuid();
-      Shop newSelectedShop = null;
-      if (alwaysShopUuid != null) {
-        try {
-          newSelectedShop = newShops.firstWhere((shop) => shop.uuid == alwaysShopUuid);
-        } catch (err) { }
-      }
       setState(() {
         serviceAreas =
             newServiceAreas.where((serviceArea) => serviceArea.zoom >= 10);
         shops = newShops;
       });
-      if (newSelectedShop != null) {
-        _setCurrentShopInPageView(newSelectedShop);
-        setState(() {
-          selectedShop = newSelectedShop;
-        });
-      }
     }
   }
 
