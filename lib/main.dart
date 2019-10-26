@@ -30,16 +30,16 @@ class AlwaysDrinkApp extends StatelessWidget {
 }
 
 class ShopDetail extends StatelessWidget {
+  const ShopDetail({this.shop});
+
   final Shop shop;
 
-  ShopDetail({this.shop});
-
-  _saveAlwaysShopUuid(String uuid) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("shop_uuid", uuid);
+  Future<void> _saveAlwaysShopUuid(String uuid) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('shop_uuid', uuid);
   }
 
-  _openBrowser(String url) async {
+  Future<void> _openBrowser(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     }
@@ -49,8 +49,8 @@ class ShopDetail extends StatelessWidget {
     return FadeInImage(
       placeholder: NetworkImage(picture.smallUrl),
       image: NetworkImage(picture.largeUrl),
-      fadeOutDuration: Duration(milliseconds: 30),
-      fadeInDuration: Duration(milliseconds: 600),
+      fadeOutDuration: const Duration(milliseconds: 30),
+      fadeInDuration: const Duration(milliseconds: 600),
       fit: BoxFit.cover,
     );
   }
@@ -66,9 +66,9 @@ class ShopDetail extends StatelessWidget {
           SizedBox(
             height: 220,
             child: ListView(
-              children: shop.pictures.map<Widget>((picture) {
+              children: shop.pictures.map<Widget>((Picture picture) {
                 return Padding(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     margin: EdgeInsets.zero,
@@ -80,46 +80,61 @@ class ShopDetail extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 16),
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 24,
+              bottom: 16,
+            ),
             child: Text(shop.description,
                 style: Theme.of(context)
                     .textTheme
                     .body1
-                    .merge(TextStyle(height: 1.5))),
+                    .merge(const TextStyle(height: 1.5))),
           ),
-          Divider(),
+          const Divider(),
           Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8),
-            child: Text("営業時間", style: Theme.of(context).textTheme.subhead),
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 24,
+              bottom: 8,
+            ),
+            child: Text('営業時間', style: Theme.of(context).textTheme.subhead),
           ),
           Padding(
-            padding: EdgeInsets.only(left: 32, right: 16, top: 8, bottom: 16),
+            padding: const EdgeInsets.only(
+              left: 32,
+              right: 16,
+              top: 8,
+              bottom: 16,
+            ),
             child: Text(shop.businessHoursDescription,
                 style: Theme.of(context)
                     .textTheme
                     .body1
-                    .merge(TextStyle(height: 1.5))),
+                    .merge(const TextStyle(height: 1.5))),
           ),
           Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Row(
               children: <Widget>[
                 OutlineButton(
-                  child: Text("Set As Always"),
+                  child: const Text('SET AS ALWAYS'),
                   color: alwaysDrinkAccentColor,
                   textColor: alwaysDrinkAccentColor,
                   onPressed: () {
                     _saveAlwaysShopUuid(shop.uuid);
                   },
                 ),
-                Spacer(),
+                const Spacer(),
                 RaisedButton(
-                  child: Text("パスを表示"),
+                  child: const Text('パスを表示'),
                   color: alwaysDrinkAccentColor,
                   textColor: Colors.white,
                   onPressed: () {
                     _openBrowser(
-                        "https://always.fan/original/drink/user-subscription/751acbbe?p=${shop.uuid}");
+                        'https://always.fan/original/drink/user-subscription/751acbbe?p=${shop.uuid}');
                   },
                 ),
               ],
@@ -135,15 +150,16 @@ class ShopDetail extends StatelessWidget {
 }
 
 class ShopListPageState extends State {
-  static CameraPosition _initCameraPosition =
+  static const CameraPosition _initCameraPosition =
       CameraPosition(target: LatLng(34.6870728, 135.0490244), zoom: 5.0);
-  Completer<GoogleMapController> _googleMapController = Completer();
+  final Completer<GoogleMapController> _googleMapController =
+      Completer<GoogleMapController>();
 
   PageController _pageController;
 
-  Iterable<ServiceArea> serviceAreas = List();
-  List<Shop> shops = List();
-  Shop selectedShop = null;
+  Iterable<ServiceArea> serviceAreas = <ServiceArea>[];
+  List<Shop> shops = <Shop>[];
+  Shop selectedShop;
 
   @override
   void initState() {
@@ -156,57 +172,77 @@ class ShopListPageState extends State {
   }
 
   Future<String> _alwaysShopUuid() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("shop_uuid");
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('shop_uuid');
   }
 
-  _fetchShopList() async {
-    final response = await http.get(
-        "https://api.always.fan/mono/v2/pb/subscription-plan/751acbbe/provider");
+  Future<void> _fetchShopList() async {
+    final http.Response response = await http.get(
+        'https://api.always.fan/mono/v2/pb/subscription-plan/751acbbe/provider');
     if (response.statusCode == 200) {
+      // ignore: always_specify_types
       final responseJson = json.decode(response.body);
-      List<ServiceArea> newServiceAreas =
-          (responseJson["places"] as Iterable).map((place) {
+      // ignore: always_specify_types
+      final Iterable places = responseJson['places'];
+      // ignore: always_specify_types
+      final List<ServiceArea> newServiceAreas = places.map((place) {
+        final int zoom = place['zoom'];
         return ServiceArea(
-          uuid: place["uuid"],
-          name: place["name"],
-          location: LatLng(place["lat"], place["lng"]),
-          zoom: (place["zoom"] as int).toDouble(),
+          uuid: place['uuid'],
+          name: place['name'],
+          location: LatLng(place['lat'], place['lng']),
+          zoom: zoom.toDouble(),
         );
       }).toList();
 
-      List<Shop> newShops = (responseJson["menus"] as Iterable).map((menu) {
+      // ignore: always_specify_types
+      final Iterable menus = responseJson['menus'];
+      // ignore: always_specify_types
+      final List<Shop> newShops = menus.map((menu) {
+        // ignore: always_specify_types
+        final Iterable pictures = menu['pictures'];
+        // ignore: always_specify_types
+        final Iterable pbProviderPictures = menu['pbProvider']['pictures'];
         return Shop(
-          uuid: menu["pbProvider"]["uuid"],
-          name: menu["pbProvider"]["name"],
-          description: menu["pbProvider"]["description"],
-          roughLocationDescription: menu["pbProvider"]["area"],
-          businessHoursDescription: menu["pbProvider"]["businessHours"],
-          location: LatLng(menu["pbProvider"]["location"]["lat"],
-              menu["pbProvider"]["location"]["lon"]),
-          thumbnail: (menu["pictures"] as Iterable).map((picture) {
+          uuid: menu['pbProvider']['uuid'],
+          name: menu['pbProvider']['name'],
+          description: menu['pbProvider']['description'],
+          roughLocationDescription: menu['pbProvider']['area'],
+          businessHoursDescription: menu['pbProvider']['businessHours'],
+          location: LatLng(
+            menu['pbProvider']['location']['lat'],
+            menu['pbProvider']['location']['lon'],
+          ),
+          // ignore: always_specify_types
+          thumbnail: pictures.map((picture) {
             return Picture(
-                smallUrl: picture["pictureUrl"]["smallUrl"],
-                largeUrl: picture["pictureUrl"]["largeUrl"]);
+              smallUrl: picture['pictureUrl']['smallUrl'],
+              largeUrl: picture['pictureUrl']['largeUrl'],
+            );
           }).first,
-          pictures: (menu["pbProvider"]["pictures"] as Iterable).map((picture) {
+          // ignore: always_specify_types
+          pictures: pbProviderPictures.map((picture) {
             return Picture(
-                smallUrl: picture["pictureUrl"]["smallUrl"],
-                largeUrl: picture["pictureUrl"]["largeUrl"]);
+              smallUrl: picture['pictureUrl']['smallUrl'],
+              largeUrl: picture['pictureUrl']['largeUrl'],
+            );
           }).toList(),
         );
       }).toList();
-      String alwaysShopUuid = await _alwaysShopUuid();
-      Shop newSelectedShop = null;
+
+      final String alwaysShopUuid = await _alwaysShopUuid();
+      Shop newSelectedShop;
       if (alwaysShopUuid != null) {
         try {
           newSelectedShop =
-              newShops.firstWhere((shop) => shop.uuid == alwaysShopUuid);
-        } catch (err) {}
+              newShops.firstWhere((Shop shop) => shop.uuid == alwaysShopUuid);
+        } catch (err) {
+          // エラー起きたときには初期フォーカスされないだけなので、特になにもしない。
+        }
       }
       setState(() {
-        serviceAreas =
-            newServiceAreas.where((serviceArea) => serviceArea.zoom >= 10);
+        serviceAreas = newServiceAreas
+            .where((ServiceArea serviceArea) => serviceArea.zoom >= 10);
         shops = newShops;
       });
       if (newSelectedShop != null) {
@@ -224,8 +260,9 @@ class ShopListPageState extends State {
     _pageController.dispose();
   }
 
-  _setCurrentShopInPageView(Shop target) {
-    int targetPage = shops.indexWhere((shop) => shop.uuid == target.uuid);
+  void _setCurrentShopInPageView(Shop target) {
+    final int targetPage =
+        shops.indexWhere((Shop shop) => shop.uuid == target.uuid);
     if (targetPage >= 0 && _pageController.hasClients) {
       _pageController.jumpToPage(targetPage);
     }
@@ -233,9 +270,10 @@ class ShopListPageState extends State {
 
   @override
   Widget build(BuildContext context) {
-    _googleMapController.future.then((googleMap) {
+    _googleMapController.future.then((GoogleMapController googleMap) {
       if (selectedShop != null) {
-        double zoom = selectedShop.nearestServiceAreaIn(serviceAreas).zoom;
+        final double zoom =
+            selectedShop.nearestServiceAreaIn(serviceAreas).zoom;
         googleMap.animateCamera(
             CameraUpdate.newLatLngZoom(selectedShop.location, zoom));
       }
@@ -245,7 +283,7 @@ class ShopListPageState extends State {
         Expanded(
           child: GoogleMap(
             initialCameraPosition: _initCameraPosition,
-            markers: shops.map((shop) {
+            markers: shops.map((Shop shop) {
               return Marker(
                   markerId: MarkerId(shop.uuid),
                   position: shop.location,
@@ -258,7 +296,7 @@ class ShopListPageState extends State {
                   });
             }).toSet(),
             myLocationButtonEnabled: false,
-            onMapCreated: (googleMap) {
+            onMapCreated: (GoogleMapController googleMap) {
               _googleMapController.complete(googleMap);
             },
           ),
@@ -267,13 +305,13 @@ class ShopListPageState extends State {
           height: 280,
           child: PageView(
             controller: _pageController,
-            children: shops.map<Widget>((shop) {
+            children: shops.map<Widget>((Shop shop) {
               return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: Card(
                   clipBehavior: Clip.antiAlias,
                   margin: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   ),
                   child: Stack(
@@ -291,9 +329,9 @@ class ShopListPageState extends State {
                                 .subhead
                                 .merge(TextStyle(color: Colors.white)),
                           ),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                               color: Color.fromARGB(0x99, 0, 0, 0)),
-                          padding: EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(8),
                         ),
                       )
                     ],
@@ -301,7 +339,7 @@ class ShopListPageState extends State {
                 ),
               );
             }).toList(),
-            onPageChanged: (page) {
+            onPageChanged: (int page) {
               setState(() {
                 if (page >= 0 && page < shops.length) {
                   selectedShop = shops.elementAt(page);
@@ -315,7 +353,6 @@ class ShopListPageState extends State {
         ),
       ],
     );
-    ;
   }
 }
 

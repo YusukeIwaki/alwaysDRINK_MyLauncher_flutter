@@ -4,15 +4,6 @@ import 'picture.dart';
 import 'service_area.dart';
 
 class Shop {
-  String uuid;
-  String name;
-  String description;
-  String roughLocationDescription;
-  String businessHoursDescription;
-  LatLng location;
-  Picture thumbnail;
-  List<Picture> pictures;
-
   Shop({
     this.uuid,
     this.name,
@@ -24,9 +15,18 @@ class Shop {
     this.pictures,
   });
 
+  String uuid;
+  String name;
+  String description;
+  String roughLocationDescription;
+  String businessHoursDescription;
+  LatLng location;
+  Picture thumbnail;
+  List<Picture> pictures;
+
   String markerTitle() {
     if (roughLocationDescription.isNotEmpty) {
-      return "${roughLocationDescription} - ${name}";
+      return '$roughLocationDescription - $name';
     } else {
       return name;
     }
@@ -40,9 +40,12 @@ class Shop {
   }
 
   ServiceArea nearestServiceAreaIn(Iterable<ServiceArea> serviceAreas) {
-    return serviceAreas.reduce((currentArea, nextArea) =>
-        _dist2From(nextArea.location) < _dist2From(currentArea.location)
-            ? nextArea
-            : currentArea);
+    return serviceAreas.reduce((ServiceArea currentArea, ServiceArea nextArea) {
+      if (_dist2From(nextArea.location) < _dist2From(currentArea.location)) {
+        return nextArea;
+      } else {
+        return currentArea;
+      }
+    });
   }
 }
