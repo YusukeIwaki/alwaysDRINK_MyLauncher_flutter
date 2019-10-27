@@ -21,6 +21,8 @@ class PolygonOptions {
 typedef ClusterWidgetBuilder = Widget Function(
     BuildContext context, List<Marker> markers);
 
+typedef ShouldRenderAsCluster = bool Function(int zoom);
+
 class MarkerClusterLayerOptions extends LayerOptions {
   /// Cluster builder
   final ClusterWidgetBuilder builder;
@@ -71,6 +73,8 @@ class MarkerClusterLayerOptions extends LayerOptions {
   /// Polygon's options that shown when tap cluster.
   final PolygonOptions polygonOptions;
 
+  final ShouldRenderAsCluster shouldRenderAsCluster;
+
   MarkerClusterLayerOptions({
     @required this.builder,
     this.markers = const [],
@@ -89,5 +93,6 @@ class MarkerClusterLayerOptions extends LayerOptions {
     this.spiderfyShapePositions,
     this.polygonOptions = const PolygonOptions(),
     this.showPolygon = true,
+    this.shouldRenderAsCluster,
   }) : assert(builder != null);
 }

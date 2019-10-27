@@ -343,6 +343,7 @@ class ShopListPageState extends State {
                     onPressed: null,
                   );
                 },
+                shouldRenderAsCluster: (zoom) => zoom <= 10,
               ),
             ],
             mapController: _mapController,
