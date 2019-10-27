@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'flutter_map_marker_cluster/marker_cluster_layer_options.dart';
+import 'flutter_map_marker_cluster/marker_cluster_plugin.dart';
 
 import 'material_color.dart';
 import 'models/picture.dart';
@@ -150,11 +153,10 @@ class ShopDetail extends StatelessWidget {
 }
 
 class ShopListPageState extends State {
-  static const CameraPosition _initCameraPosition =
-      CameraPosition(target: LatLng(34.6870728, 135.0490244), zoom: 5.0);
-  final Completer<GoogleMapController> _googleMapController =
-      Completer<GoogleMapController>();
+  static final LatLng _initPosition = LatLng(34.6870728, 135.0490244);
+  static const double _initZoom = 5.0;
 
+  MapController _mapController;
   PageController _pageController;
 
   Iterable<ServiceArea> serviceAreas = <ServiceArea>[];
@@ -165,6 +167,7 @@ class ShopListPageState extends State {
   void initState() {
     super.initState();
 
+    _mapController = MapController();
     _pageController = PageController(
       viewportFraction: 0.95,
     );
@@ -270,35 +273,79 @@ class ShopListPageState extends State {
 
   @override
   Widget build(BuildContext context) {
-    _googleMapController.future.then((GoogleMapController googleMap) {
-      if (selectedShop != null) {
-        final double zoom =
-            selectedShop.nearestServiceAreaIn(serviceAreas).zoom;
-        googleMap.animateCamera(
-            CameraUpdate.newLatLngZoom(selectedShop.location, zoom));
-      }
-    });
+    if (selectedShop != null) {
+      final double zoom = selectedShop.nearestServiceAreaIn(serviceAreas).zoom;
+      _mapController.move(selectedShop.location, zoom);
+    }
+
     return Column(
       children: <Widget>[
         Expanded(
-          child: GoogleMap(
-            initialCameraPosition: _initCameraPosition,
-            markers: shops.map((Shop shop) {
-              return Marker(
-                  markerId: MarkerId(shop.uuid),
-                  position: shop.location,
-                  icon: shop.uuid == selectedShop?.uuid
-                      ? BitmapDescriptor.defaultMarker
-                      : BitmapDescriptor.defaultMarkerWithHue(180),
-                  infoWindow: InfoWindow(title: shop.markerTitle()),
-                  onTap: () {
-                    _setCurrentShopInPageView(shop);
-                  });
-            }).toSet(),
-            myLocationButtonEnabled: false,
-            onMapCreated: (GoogleMapController googleMap) {
-              _googleMapController.complete(googleMap);
-            },
+          child: FlutterMap(
+            options: MapOptions(
+              center: _initPosition,
+              zoom: _initZoom,
+              onTap: (LatLng position) {
+                setState(() {
+                  selectedShop = null;
+                });
+              },
+              plugins: [
+                MarkerClusterPlugin(),
+              ],
+            ),
+            layers: [
+              TileLayerOptions(
+                urlTemplate: "https://api.tiles.mapbox.com/v4/"
+                    "{id}/{z}/{x}/{y}@2x.png?access_token={accessToken}",
+                additionalOptions: {
+                  'accessToken': '<YOUR ACCESS TOKEN>',
+                  'id': 'mapbox.streets',
+                },
+              ),
+              MarkerClusterLayerOptions(
+                maxClusterRadius: 120,
+                size: Size(40, 40),
+                fitBoundsOptions: FitBoundsOptions(
+                  padding: EdgeInsets.all(50),
+                ),
+                markers: shops.map((Shop shop) {
+                  return Marker(
+                    point: shop.location,
+                    builder: (BuildContext context) {
+                      if (shop.uuid == selectedShop?.uuid) {
+                        return Icon(
+                          Icons.local_cafe,
+                          size: 36,
+                          color: Colors.redAccent,
+                        );
+                      } else {
+                        return Icon(
+                          Icons.place,
+                          size: 24,
+                          color: Colors.cyanAccent,
+                        );
+                      }
+                    },
+//                      infoWindow: InfoWindow(title: shop.markerTitle()),
+//                      onTap: () {
+//                        _setCurrentShopInPageView(shop);
+//                      });
+                  );
+                }).toList(),
+                polygonOptions: PolygonOptions(
+                    borderColor: Colors.blueAccent,
+                    color: Colors.black12,
+                    borderStrokeWidth: 3),
+                builder: (context, markers) {
+                  return FloatingActionButton(
+                    child: Text(markers.length.toString()),
+                    onPressed: null,
+                  );
+                },
+              ),
+            ],
+            mapController: _mapController,
           ),
         ),
         Container(

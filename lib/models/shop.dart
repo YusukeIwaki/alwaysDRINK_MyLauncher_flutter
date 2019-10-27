@@ -1,4 +1,5 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:latlong/latlong.dart';
 
 import 'picture.dart';
 import 'service_area.dart';
