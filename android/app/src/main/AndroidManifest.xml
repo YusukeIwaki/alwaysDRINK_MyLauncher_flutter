@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.github.yusukeiwaki.better_always_drink">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -10,10 +11,6 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="always DRINK"
         android:icon="@mipmap/ic_launcher">
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
 
         <activity
             android:name=".MainActivity"
