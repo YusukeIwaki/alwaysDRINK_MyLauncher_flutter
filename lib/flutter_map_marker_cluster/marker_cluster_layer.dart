@@ -530,6 +530,10 @@ class _MarkerClusterLayerState extends State<MarkerClusterLayer>
 
       if (!widget.options.zoomToBoundsOnClick) return null;
 
+      if (widget.options.onMarkerClusterNodeTap != null && widget.options.onMarkerClusterNodeTap(cluster)) {
+        return null;
+      }
+
       _showPolygon(cluster.markers.fold<List<LatLng>>(
           [], (result, marker) => result..add(marker.point)));
 
@@ -600,6 +604,10 @@ class _MarkerClusterLayerState extends State<MarkerClusterLayer>
           _fitBoundController.isAnimating) return null;
 
       if (!widget.options.centerMarkerOnClick) return null;
+
+      if (widget.options.onMarkerNodeTap != null && widget.options.onMarkerNodeTap(marker)) {
+        return null;
+      }
 
       final center = widget.map.center;
 

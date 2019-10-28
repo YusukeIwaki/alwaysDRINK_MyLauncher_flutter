@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:better_always_drink/flutter_map_marker_cluster/node/marker_cluster_node.dart';
+import 'package:better_always_drink/flutter_map_marker_cluster/node/marker_node.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -22,6 +24,10 @@ typedef ClusterWidgetBuilder = Widget Function(
     BuildContext context, List<Marker> markers);
 
 typedef ShouldRenderAsCluster = bool Function(int zoom);
+
+typedef MarkerClusterNodeTapCallback = bool Function(MarkerClusterNode cluster);
+
+typedef MarkerNodeTapCallback = bool Function(MarkerNode marker);
 
 class MarkerClusterLayerOptions extends LayerOptions {
   /// Cluster builder
@@ -75,6 +81,10 @@ class MarkerClusterLayerOptions extends LayerOptions {
 
   final ShouldRenderAsCluster shouldRenderAsCluster;
 
+  final MarkerClusterNodeTapCallback onMarkerClusterNodeTap;
+
+  final MarkerNodeTapCallback onMarkerNodeTap;
+
   MarkerClusterLayerOptions({
     @required this.builder,
     this.markers = const [],
@@ -94,5 +104,7 @@ class MarkerClusterLayerOptions extends LayerOptions {
     this.polygonOptions = const PolygonOptions(),
     this.showPolygon = true,
     this.shouldRenderAsCluster,
+    this.onMarkerClusterNodeTap,
+    this.onMarkerNodeTap,
   }) : assert(builder != null);
 }

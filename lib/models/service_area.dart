@@ -12,4 +12,11 @@ class ServiceArea {
   String name;
   LatLng location;
   double zoom;
+
+  double dist2From(LatLng target) {
+    return (location.latitude - target.latitude) *
+        (location.latitude - target.latitude) +
+        (location.longitude - target.longitude) *
+            (location.longitude - target.longitude);
+  }
 }

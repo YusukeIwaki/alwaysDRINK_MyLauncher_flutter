@@ -7,9 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:latlong/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import 'flutter_map_marker_cluster/marker_cluster_layer_options.dart';
 import 'flutter_map_marker_cluster/marker_cluster_plugin.dart';
-
+import 'flutter_map_marker_cluster/node/marker_cluster_node.dart';
+import 'flutter_map_marker_cluster/node/marker_node.dart';
 import 'material_color.dart';
 import 'models/picture.dart';
 import 'models/service_area.dart';
@@ -152,6 +154,15 @@ class ShopDetail extends StatelessWidget {
   }
 }
 
+class ShopMarker extends Marker {
+  ShopMarker({
+    @required this.shop,
+    WidgetBuilder builder,
+  }) : super(builder: builder, point: shop.location);
+
+  final Shop shop;
+}
+
 class ShopListPageState extends State {
   static final LatLng _initPosition = LatLng(34.6870728, 135.0490244);
   static const double _initZoom = 5.0;
@@ -271,6 +282,16 @@ class ShopListPageState extends State {
     }
   }
 
+  ServiceArea nearestServiceAreaFrom(LatLng location) {
+    return serviceAreas.reduce((ServiceArea currentArea, ServiceArea nextArea) {
+      if (nextArea.dist2From(location) < currentArea.dist2From(location)) {
+        return nextArea;
+      } else {
+        return currentArea;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (selectedShop != null) {
@@ -310,8 +331,8 @@ class ShopListPageState extends State {
                   padding: EdgeInsets.all(50),
                 ),
                 markers: shops.map((Shop shop) {
-                  return Marker(
-                    point: shop.location,
+                  return ShopMarker(
+                    shop: shop,
                     builder: (BuildContext context) {
                       if (shop.uuid == selectedShop?.uuid) {
                         return Icon(
@@ -327,10 +348,6 @@ class ShopListPageState extends State {
                         );
                       }
                     },
-//                      infoWindow: InfoWindow(title: shop.markerTitle()),
-//                      onTap: () {
-//                        _setCurrentShopInPageView(shop);
-//                      });
                   );
                 }).toList(),
                 polygonOptions: PolygonOptions(
@@ -344,6 +361,23 @@ class ShopListPageState extends State {
                   );
                 },
                 shouldRenderAsCluster: (zoom) => zoom <= 10,
+                onMarkerNodeTap: (MarkerNode marker) {
+                  ShopMarker shopMarker = marker.marker;
+                  _setCurrentShopInPageView(shopMarker.shop);
+                  return false;
+                },
+                onMarkerClusterNodeTap: (MarkerClusterNode cluster) {
+                  ServiceArea serviceArea = nearestServiceAreaFrom(cluster.point);
+                  if (serviceArea != null) {
+                    _mapController.move(serviceArea.location, serviceArea.zoom);
+
+                    if (selectedShop != null && selectedShop.nearestServiceAreaIn(serviceAreas) != serviceArea) {
+                      ShopMarker firstShop = cluster.markers.first.marker;
+                      _setCurrentShopInPageView(firstShop.shop);
+                    }
+                  }
+                  return false;
+                },
               ),
             ],
             mapController: _mapController,
