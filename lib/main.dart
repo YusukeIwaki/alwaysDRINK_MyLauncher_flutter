@@ -24,7 +24,9 @@ class AlwaysDrinkApp extends StatelessWidget {
         primarySwatch: alwaysDrinkColor,
         accentColor: alwaysDrinkAccentColor,
       ),
-      home: ShopListPage(),
+      home: Scaffold(
+        body: ShopListPage(),
+      ),
     );
   }
 }
@@ -125,6 +127,13 @@ class ShopDetail extends StatelessWidget {
                   textColor: alwaysDrinkAccentColor,
                   onPressed: () {
                     _saveAlwaysShopUuid(shop.uuid);
+                    final SnackBar snackBar = SnackBar(
+                      content: Text('${shop.name} が\n次回起動時からすぐ表示されます'),
+                    );
+
+                    // Find the Scaffold in the widget tree and use
+                    // it to show a SnackBar.
+                    Scaffold.of(context).showSnackBar(snackBar);
                   },
                 ),
                 const Spacer(),
