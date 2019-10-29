@@ -127,7 +127,7 @@ class ShopDetail extends StatelessWidget {
                   textColor: alwaysDrinkAccentColor,
                   onPressed: () {
                     _saveAlwaysShopUuid(shop.uuid);
-                    final snackBar = SnackBar(
+                    final SnackBar snackBar = SnackBar(
                       content: Text('${shop.name} が\n次回起動時からすぐ表示されます'),
                     );
 
