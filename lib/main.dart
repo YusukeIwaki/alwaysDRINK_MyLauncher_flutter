@@ -256,9 +256,41 @@ class ShopListPageState extends State {
       });
       if (newSelectedShop != null) {
         _setCurrentShopInPageView(newSelectedShop);
-        setState(() {
-          selectedShop = newSelectedShop;
-        });
+        _updateSelectedShop(newSelectedShop);
+      }
+    }
+  }
+
+  void _updateSelectedShop(Shop newShop) {
+    _hideInfoWindowForSelectedShop();
+    setState(() {
+      selectedShop = newShop;
+    });
+    _showInfoWindowForSelectedShop();
+  }
+
+  Future<void> _showInfoWindowForSelectedShop() async {
+    if (selectedShop != null && _googleMapController.isCompleted) {
+      final GoogleMapController googleMap = await _googleMapController.future;
+
+      final MarkerId selectedShopMarker = MarkerId(selectedShop.uuid);
+      final bool isSelectedShopMarkerShown =
+          await googleMap.isMarkerInfoWindowShown(selectedShopMarker);
+      if (!isSelectedShopMarkerShown) {
+        await googleMap.showMarkerInfoWindow(selectedShopMarker);
+      }
+    }
+  }
+
+  Future<void> _hideInfoWindowForSelectedShop() async {
+    if (selectedShop != null && _googleMapController.isCompleted) {
+      final GoogleMapController googleMap = await _googleMapController.future;
+
+      final MarkerId selectedShopMarker = MarkerId(selectedShop.uuid);
+      final bool isSelectedShopMarkerShown =
+          await googleMap.isMarkerInfoWindowShown(selectedShopMarker);
+      if (isSelectedShopMarkerShown) {
+        await googleMap.hideMarkerInfoWindow(selectedShopMarker);
       }
     }
   }
@@ -279,12 +311,13 @@ class ShopListPageState extends State {
 
   @override
   Widget build(BuildContext context) {
-    _googleMapController.future.then((GoogleMapController googleMap) {
+    _googleMapController.future.then((GoogleMapController googleMap) async {
       if (selectedShop != null) {
         final double zoom =
             selectedShop.nearestServiceAreaIn(serviceAreas).zoom;
         googleMap.animateCamera(
             CameraUpdate.newLatLngZoom(selectedShop.location, zoom));
+        _showInfoWindowForSelectedShop();
       }
     });
     return Column(
@@ -349,13 +382,11 @@ class ShopListPageState extends State {
               );
             }).toList(),
             onPageChanged: (int page) {
-              setState(() {
-                if (page >= 0 && page < shops.length) {
-                  selectedShop = shops.elementAt(page);
-                } else {
-                  selectedShop = null;
-                }
-              });
+              if (page >= 0 && page < shops.length) {
+                _updateSelectedShop(shops.elementAt(page));
+              } else {
+                _updateSelectedShop(null);
+              }
             },
           ),
           decoration: BoxDecoration(color: Colors.white),
