@@ -48,4 +48,34 @@ class Shop {
       }
     });
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Shop &&
+          runtimeType == other.runtimeType &&
+          uuid == other.uuid &&
+          name == other.name &&
+          description == other.description &&
+          roughLocationDescription == other.roughLocationDescription &&
+          businessHoursDescription == other.businessHoursDescription &&
+          location == other.location &&
+          thumbnail == other.thumbnail &&
+          pictures == other.pictures;
+
+  @override
+  int get hashCode =>
+      uuid.hashCode ^
+      name.hashCode ^
+      description.hashCode ^
+      roughLocationDescription.hashCode ^
+      businessHoursDescription.hashCode ^
+      location.hashCode ^
+      thumbnail.hashCode ^
+      pictures.hashCode;
+
+  @override
+  String toString() {
+    return 'Shop{uuid: $uuid, name: $name, description: $description, roughLocationDescription: $roughLocationDescription, businessHoursDescription: $businessHoursDescription, location: $location, thumbnail: $thumbnail, pictures: $pictures}';
+  }
 }

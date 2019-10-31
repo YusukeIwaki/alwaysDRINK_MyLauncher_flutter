@@ -271,7 +271,7 @@ class ShopListPageState extends State {
   }
 
   void _updateSelectedShop(Shop newShop) {
-    if (selectedShop?.uuid == newShop?.uuid) {
+    if (selectedShop == newShop) {
       return;
     }
     _hideInfoWindowForSelectedShop();
