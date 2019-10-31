@@ -325,11 +325,12 @@ class ShopListPageState extends State {
     }
 
     _isPageViewAnimating = true;
-    _pageController.animateToPage(
+    final Future<void> onAnimateToPageComplete = _pageController.animateToPage(
       targetPage,
-      duration: Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutQuart,
-    ).then((_) {
+    );
+    onAnimateToPageComplete.then((_) {
       // animateToPageでアニメーション途中にも通知されてしまうバグのworkaround.
       // https://github.com/flutter/flutter/issues/43813
       _isPageViewAnimating = false;
