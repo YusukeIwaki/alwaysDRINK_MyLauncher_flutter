@@ -84,10 +84,10 @@ packages:
   google_maps_flutter:
     dependency: "direct main"
     description:
-      name: google_maps_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.5.21+8"
+      path: google_maps_flutter
+      relative: true
+    source: path
+    version: "0.5.21+7"
   http:
     dependency: "direct main"
     description:
