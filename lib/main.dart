@@ -165,6 +165,7 @@ class ShopListPageState extends State {
       Completer<GoogleMapController>();
 
   PageController _pageController;
+  bool _isPageViewAnimating;
 
   Iterable<ServiceArea> serviceAreas = <ServiceArea>[];
   List<Shop> shops = <Shop>[];
@@ -177,6 +178,7 @@ class ShopListPageState extends State {
     _pageController = PageController(
       viewportFraction: 0.95,
     );
+    _isPageViewAnimating = false;
     _fetchShopList();
   }
 
@@ -255,13 +257,23 @@ class ShopListPageState extends State {
         shops = newShops;
       });
       if (newSelectedShop != null) {
-        _setCurrentShopInPageView(newSelectedShop);
         _updateSelectedShop(newSelectedShop);
       }
     }
   }
 
+  void _updateSelectedShopForPage(int page) {
+    if (page >= 0 && page < shops.length) {
+      _updateSelectedShop(shops.elementAt(page));
+    } else {
+      _updateSelectedShop(null);
+    }
+  }
+
   void _updateSelectedShop(Shop newShop) {
+    if (selectedShop == newShop) {
+      return;
+    }
     _hideInfoWindowForSelectedShop();
     setState(() {
       selectedShop = newShop;
@@ -304,9 +316,26 @@ class ShopListPageState extends State {
   void _setCurrentShopInPageView(Shop target) {
     final int targetPage =
         shops.indexWhere((Shop shop) => shop.uuid == target.uuid);
-    if (targetPage >= 0 && _pageController.hasClients) {
-      _pageController.jumpToPage(targetPage);
+    if (targetPage <= 0 || !_pageController.hasClients) {
+      return;
     }
+    final int currentPage = _pageController.page.toInt();
+    if (targetPage == currentPage) {
+      return;
+    }
+
+    _isPageViewAnimating = true;
+    final Future<void> onAnimateToPageComplete = _pageController.animateToPage(
+      targetPage,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutQuart,
+    );
+    onAnimateToPageComplete.then((_) {
+      // animateToPageでアニメーション途中にも通知されてしまうバグのworkaround.
+      // https://github.com/flutter/flutter/issues/43813
+      _isPageViewAnimating = false;
+      _updateSelectedShopForPage(targetPage);
+    });
   }
 
   @override
@@ -320,6 +349,9 @@ class ShopListPageState extends State {
         _showInfoWindowForSelectedShop();
       }
     });
+    if (selectedShop != null) {
+      _setCurrentShopInPageView(selectedShop);
+    }
     return Column(
       children: <Widget>[
         Expanded(
@@ -334,7 +366,7 @@ class ShopListPageState extends State {
                       : BitmapDescriptor.defaultMarkerWithHue(180),
                   infoWindow: InfoWindow(title: shop.markerTitle()),
                   onTap: () {
-                    _setCurrentShopInPageView(shop);
+                    _updateSelectedShop(shop);
                   });
             }).toSet(),
             myLocationButtonEnabled: false,
@@ -382,11 +414,12 @@ class ShopListPageState extends State {
               );
             }).toList(),
             onPageChanged: (int page) {
-              if (page >= 0 && page < shops.length) {
-                _updateSelectedShop(shops.elementAt(page));
-              } else {
-                _updateSelectedShop(null);
+              if (_isPageViewAnimating) {
+                // animateToPageでアニメーション途中にも通知されてしまうバグのworkaround.
+                // https://github.com/flutter/flutter/issues/43813
+                return;
               }
+              _updateSelectedShopForPage(page);
             },
           ),
           decoration: BoxDecoration(color: Colors.white),
